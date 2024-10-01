@@ -8,8 +8,12 @@ import struct
 import io
 import httpx
 import json
+import os
+from pathlib import Path
 from . import wbi
 from . import fp_raw
+
+cur_path = Path(os.path.dirname(__file__))
 
 browser_header = {
         "authority": "api.bilibili.com",
@@ -268,6 +272,24 @@ class Mylog:
     def trace(self, linfo):
         print(linfo)
 
+def parse_netscape_cookies(cookies_txt: str) -> dict:
+    cookies = {}
+    lines = cookies_txt.split("\n")
+    for line in lines:
+        # 跳过注释和空行
+        if line.startswith('#') or not line.strip():
+            continue
+
+        # 按照 Netscape cookies.txt 文件的字段顺序解析
+        fields = line.strip().split('\t')
+        if len(fields) != 7:
+            continue
+
+        # 只保存 name 和 value 作为键值对
+        cookies[fields[5]] = fields[6]
+
+    return cookies
+
 async def update_cookies(fail = 0, log = Mylog()):
     # 更新一次小饼干
     global gcookies, gcookies_outtime
@@ -277,12 +299,14 @@ async def update_cookies(fail = 0, log = Mylog()):
         # url = "https://www.bilibili.com"
         url = "https://space.bilibili.com/2/dynamic"
         try:
-            # 从bilibili.com获得一条cookies
-            async with httpx.AsyncClient() as client:
-                request = await client.get(url, headers=browser_header)
-            # print('GET:\tget cookies')
-            cookies = request.cookies
-            # print(cookies)
+            # # 从bilibili.com获得一条cookies
+            # async with httpx.AsyncClient() as client:
+            #     request = await client.get(url, headers=browser_header)
+            # # print('GET:\tget cookies')
+            # cookies = request.cookies
+            # # print(cookies)
+            with open(cur_path / "cookies.txt", "r", encoding="utf-8") as f:
+                cookies = parse_netscape_cookies(f.read())
         except Exception as e:
             log.error(f'更新小饼干失败,code={e}')
             cookies=gcookies
@@ -294,7 +318,7 @@ async def update_cookies(fail = 0, log = Mylog()):
             log.info("成功更新cookies")
         elif cookies == None and gcookies:
             # 如果获取cookies失败，但是有现成的cookies，那么不更新cookies，但是提高申请频率
-            gcookies_outtime = time.time() + cok_delay*3600 - 600
+            gcookies_outtime = time.time() + cok_delay*10 - 600
             log.warning("未获取cookies, 沿用之前的cookies, 10分钟后再次尝试")
         else:
             log.warning("未获取cookies, 重试")

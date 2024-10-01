@@ -1,0 +1,34 @@
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
+# 把你的cookies.txt放在这，cookies.txt可以用浏览器插件生成（搜索cookies.txt或者cookies export或者cookies），要求导出格式为Netscape格式，且只包含bilibili一个网站的。具体实例如下，敏感信息已消除
+
+.bilibili.com	TRUE	/	FALSE	1755***44	buvid3	88AF2B57-B2B7-
+.bilibili.com	TRUE	/	FALSE	1755***44	b_nut	1723723144
+.bilibili.com	TRUE	/	FALSE	1755***45	_uuid	F1096B323-B9B1
+.bilibili.com	TRUE	/	FALSE	1818***05	rpdid	0zbfAHyr5D|NYt
+.bilibili.com	TRUE	/	FALSE	2534***0799	PVID	1
+.bilibili.com	TRUE	/	FALSE	2177***99	LIVE_BUVID	AUTO451723
+.bilibili.com	TRUE	/	FALSE	1755***59	CURRENT_QUALITY	80
+.bilibili.com	TRUE	/	FALSE	1755***79	is-2022-channel	1
+.bilibili.com	TRUE	/	FALSE	1756***26	hit-dyn-v2	1
+.bilibili.com	TRUE	/	TRUE	1742***16	SESSDATA	fec4f268%22MEREC
+.bilibili.com	TRUE	/	FALSE	1742***16	bili_jct	dda0ecb625
+.bilibili.com	TRUE	/	FALSE	1742***16	DedeUserID	21645305
+.bilibili.com	TRUE	/	FALSE	1742***16	DedeUserID__ckMd5	80
+.bilibili.com	TRUE	/	FALSE	1758***27	fingerprint	d0e4904cea
+.bilibili.com	TRUE	/	FALSE	1821***72	buvid4	6473A23F-90DB-Rs7R
+.bilibili.com	TRUE	/	FALSE	1758***73	buvid_fp_plain	undefi
+.bilibili.com	TRUE	/	FALSE	1821***73	buvid_fp	3b210f2eb4
+.bilibili.com	TRUE	/	FALSE	1729***30	bp_t_offset_21645305
+.bilibili.com	TRUE	/	FALSE	1727***23	bili_ticket	eyJhbGciOiIjot
+.bilibili.com	TRUE	/	FALSE	1727***23	bili_ticket_expires	17
+.bilibili.com	TRUE	/	FALSE	1759***11	CURRENT_FNVAL	4048
+.bilibili.com	TRUE	/	FALSE	0	***id	DFA3666B_19247F6E9E6
+.bilibili.com	TRUE	/	FALSE	1759***17	header_theme_version
+.bilibili.com	TRUE	/	FALSE	1759***17	enable_web_push	ENABL
+.bilibili.com	TRUE	/	FALSE	1759***17	iflogin_when_web_push
+.bilibili.com	TRUE	/	FALSE	1759***17	home_feed_column	5
+.bilibili.com	TRUE	/	FALSE	1759***17	browser_resolution	25
+www.bilibili.com	FALSE	/	FALSE	0	bmg_af_switch	1
+www.bilibili.com	FALSE	/	FALSE	0	bmg_src_def_domain	i1.hds

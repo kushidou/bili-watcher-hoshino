@@ -400,6 +400,8 @@ async def follow(uid, group): # sync to async
                 msg='【联网核查失败】'
                 return follow_illegal(uid, group, msg)
             # 从服务器获取信息
+            if gcookies == None:
+                gcookies = await auth.update_cookies()
             try:
                 if not gcookies == None:
                     async with httpx.AsyncClient(proxies=p) as client:
