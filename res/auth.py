@@ -10,23 +10,52 @@ import httpx
 import json
 import os
 from pathlib import Path
+from loguru import logger
 from . import wbi
-from . import fp_raw
 
 cur_path = Path(os.path.dirname(__file__))
+user_cookie = None
+
+
+def parse_netscape_cookies(cookies_txt: str) -> dict:
+    cookies = {}
+    lines = cookies_txt.split("\n")
+    for line in lines:
+        # 跳过注释和空行
+        if line.startswith("#") or not line.strip():
+            continue
+
+        # 按照 Netscape cookies.txt 文件的字段顺序解析
+        fields = line.strip().split("\t")
+        if len(fields) != 7:
+            continue
+
+        # 只保存 name 和 value 作为键值对
+        cookies[fields[5]] = fields[6]
+
+    return cookies
+
+
+try:
+    with open(cur_path / "cookies.txt", "r", encoding="utf-8") as f:
+        user_cookie = parse_netscape_cookies(f.read())
+        user_cookie["enable_web_push"] = "DISABLE"
+except Exception as e:
+    logger.warning(f"获取用户cookies失败,code={e}")
+
 
 browser_header = {
-        "authority": "api.bilibili.com",
-        "accept": "*/*",
-        "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-        "content-type": "application/json;charset=UTF-8",
-        "dnt": "1",
-        "origin": "https://space.bilibili.com",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.58",
-    }
+    "authority": "api.bilibili.com",
+    "accept": "*/*",
+    "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+    "content-type": "application/json;charset=UTF-8",
+    "dnt": "1",
+    "origin": "https://space.bilibili.com",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.58",
+}
 
 
-idpayload={
+idpayload = {
     "3064": 1,
     "5062": "1720887356232",
     "03bf": "https%3A%2F%2Fwww.bilibili.com%2F",
@@ -46,14 +75,8 @@ idpayload={
         "07a4": "zh-CN",
         "1c57": 8,
         "0bd0": 8,
-        "748e": [
-            768,
-            1366
-        ],
-        "d61f": [
-            728,
-            1366
-        ],
+        "748e": [768, 1366],
+        "d61f": [728, 1366],
         "fc9d": -480,
         "6aa9": "Asia/Shanghai",
         "75b8": 1,
@@ -65,73 +88,28 @@ idpayload={
             [
                 "PDF Viewer",
                 "Portable Document Format",
-                [
-                    [
-                        "application/pdf",
-                        "pdf"
-                    ],
-                    [
-                        "text/pdf",
-                        "pdf"
-                    ]
-                ]
+                [["application/pdf", "pdf"], ["text/pdf", "pdf"]],
             ],
             [
                 "Chrome PDF Viewer",
                 "Portable Document Format",
-                [
-                    [
-                        "application/pdf",
-                        "pdf"
-                    ],
-                    [
-                        "text/pdf",
-                        "pdf"
-                    ]
-                ]
+                [["application/pdf", "pdf"], ["text/pdf", "pdf"]],
             ],
             [
                 "Chromium PDF Viewer",
                 "Portable Document Format",
-                [
-                    [
-                        "application/pdf",
-                        "pdf"
-                    ],
-                    [
-                        "text/pdf",
-                        "pdf"
-                    ]
-                ]
+                [["application/pdf", "pdf"], ["text/pdf", "pdf"]],
             ],
             [
                 "Microsoft Edge PDF Viewer",
                 "Portable Document Format",
-                [
-                    [
-                        "application/pdf",
-                        "pdf"
-                    ],
-                    [
-                        "text/pdf",
-                        "pdf"
-                    ]
-                ]
+                [["application/pdf", "pdf"], ["text/pdf", "pdf"]],
             ],
             [
                 "WebKit built-in PDF",
                 "Portable Document Format",
-                [
-                    [
-                        "application/pdf",
-                        "pdf"
-                    ],
-                    [
-                        "text/pdf",
-                        "pdf"
-                    ]
-                ]
-            ]
+                [["application/pdf", "pdf"], ["text/pdf", "pdf"]],
+            ],
         ],
         "13ab": "MB4AAAAASUVORK5CYII=",
         "bfe9": "SAAskoALCSsZpEUcC+Av8DxpQVtSPLlMwAAAAASUVORK5CYII=",
@@ -199,17 +177,13 @@ idpayload={
             "webgl fragment shader medium int precision rangeMax:30",
             "webgl fragment shader low int precision:0",
             "webgl fragment shader low int precision rangeMin:31",
-            "webgl fragment shader low int precision rangeMax:30"
+            "webgl fragment shader low int precision rangeMax:30",
         ],
         "6bc5": "Google Inc. (Intel)~ANGLE (Intel, Intel(R) UHD Graphics (0x00009B41) Direct3D11 vs_5_0 ps_5_0, D3D11)",
         "ed31": 0,
         "72bd": 0,
         "097b": 0,
-        "52cd": [
-            0,
-            0,
-            0
-        ],
+        "52cd": [0, 0, 0],
         "a658": [
             "Arial",
             "Arial Black",
@@ -243,99 +217,58 @@ idpayload={
             "Times New Roman",
             "Trebuchet MS",
             "Verdana",
-            "Wingdings"
+            "Wingdings",
         ],
-        "d02f": "124.04347527516074"
+        "d02f": "124.04347527516074",
     },
-    "54ef": "{\"b_ut\":null,\"home_version\":\"V8\",\"i-wanna-go-back\":null,\"in_new_ab\":true,\"ab_version\":{\"for_ai_home_version\":\"V8\",\"tianma_banner_inline\":\"CONTROL\",\"enable_web_push\":\"DISABLE\"},\"ab_split_num\":{\"for_ai_home_version\":54,\"tianma_banner_inline\":54,\"enable_web_push\":10}}",
+    "54ef": '{"b_ut":null,"home_version":"V8","i-wanna-go-back":null,"in_new_ab":true,"ab_version":{"for_ai_home_version":"V8","tianma_banner_inline":"CONTROL","enable_web_push":"DISABLE"},"ab_split_num":{"for_ai_home_version":54,"tianma_banner_inline":54,"enable_web_push":10}}',
     "8b94": "",
     "df35": "9A9AF3710-310F1-D6B1-C262-62108C2DD31F1028579infoc",
     "07a4": "zh-CN",
     "5f45": "null",
-    "db46": 0
+    "db46": 0,
 }
 
-gcookies=dict()
+gcookies = {}
 gcookies_outtime = 0
 
 MOD = 1 << 64
 
+
 class Mylog:
     def error(self, linfo):
         print(linfo)
+
     def warning(self, linfo):
         print(linfo)
+
     def info(self, linfo):
         print(linfo)
+
     def debug(self, linfo):
         print(linfo)
+
     def trace(self, linfo):
         print(linfo)
 
-def parse_netscape_cookies(cookies_txt: str) -> dict:
-    cookies = {}
-    lines = cookies_txt.split("\n")
-    for line in lines:
-        # 跳过注释和空行
-        if line.startswith('#') or not line.strip():
-            continue
 
-        # 按照 Netscape cookies.txt 文件的字段顺序解析
-        fields = line.strip().split('\t')
-        if len(fields) != 7:
-            continue
-
-        # 只保存 name 和 value 作为键值对
-        cookies[fields[5]] = fields[6]
-
-    return cookies
-
-async def update_cookies(fail = 0, log = Mylog()):
+async def update_cookies(fail=0, log=Mylog()):
     # 更新一次小饼干
     global gcookies, gcookies_outtime
     cok_delay = 6
-    if time.time() - gcookies_outtime > cok_delay*3600 or fail:
-        # 每n小时更新cookies
-        # url = "https://www.bilibili.com"
-        url = "https://space.bilibili.com/2/dynamic"
-        try:
-            # # 从bilibili.com获得一条cookies
-            # async with httpx.AsyncClient() as client:
-            #     request = await client.get(url, headers=browser_header)
-            # # print('GET:\tget cookies')
-            # cookies = request.cookies
-            # # print(cookies)
-            with open(cur_path / "cookies.txt", "r", encoding="utf-8") as f:
-                cookies = parse_netscape_cookies(f.read())
-        except Exception as e:
-            log.error(f'更新小饼干失败,code={e}')
-            cookies=gcookies
-        
-        if not cookies == None:
-            # 如果成功获取cookies,那么直接写入gcookies
-            gcookies=cookies
-            gcookies_outtime = time.time()
-            log.info("成功更新cookies")
-        elif cookies == None and gcookies:
-            # 如果获取cookies失败，但是有现成的cookies，那么不更新cookies，但是提高申请频率
-            gcookies_outtime = time.time() + cok_delay*10 - 600
-            log.warning("未获取cookies, 沿用之前的cookies, 10分钟后再次尝试")
-        else:
-            log.warning("未获取cookies, 重试")
+    if time.time() - gcookies_outtime > cok_delay * 3600 or fail:
+        gcookies = user_cookie
         gcookies_outtime = time.time()
-
         gcookies["_uuid"] = gen_uuid()
-        gcookies["enable_web_push"] = "DISABLE"
-        print(gcookies)
 
         await activate_bvid()
 
         # 顺便更新wbi密钥
-        r= await  wbi.update()
+        r = await wbi.update()
         if r:
-            log.info('更新wbi密钥')
+            log.info("更新wbi密钥")
         else:
-            log.warning('wbi密钥获取失败')
+            log.warning("wbi密钥获取失败")
 
     return gcookies
 
@@ -349,16 +282,17 @@ def gen_uuid() -> str:
     t = int(time.time() * 1000) % 100000
     mp = list("123456789ABCDEF") + ["10"]
     pck = [8, 4, 4, 4, 12]
-    gen_part = lambda x: "".join([random.choice(mp) for _ in range(x)])
-    return "-".join([gen_part(l) for l in pck]) + str(t).ljust(5, "0") + "infoc"
+
+    def gen_part(x):
+        return "".join([random.choice(mp) for _ in range(x)])
+
+    return "-".join([gen_part(i) for i in pck]) + str(t).ljust(5, "0") + "infoc"
 
 
 def gen_buvid_fp(key: str, seed: int):
     source = io.BytesIO(bytes(key, "ascii"))
     m = _murmur3_x64_128(source, seed)
-    return "{}{}".format(
-        hex(m & (MOD - 1))[2:], hex(m >> 64)[2:]
-    )
+    return f"{hex(m & MOD - 1)[2:]}{hex(m >> 64)[2:]}"
 
 
 async def get_buvid() -> str:
@@ -374,13 +308,15 @@ async def activate_bvid() -> int:
     global gcookies
     url = "https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi"
     async with httpx.AsyncClient() as client:
-        request = await client.post(url, cookies=gcookies, headers=browser_header,  data=json.dumps({"payload":json.dumps(idpayload)}))
+        request = await client.post(
+            url,
+            cookies=gcookies,
+            headers=browser_header,
+            data=json.dumps({"payload": json.dumps(idpayload)}),
+        )
     # print(f'activate result = {request.status_code}')
     # print(request.text)
-    if request.status_code != 200:
-        return -1
-
-    return json.loads(request.text)["code"]
+    return -1 if request.status_code != 200 else json.loads(request.text)["code"]
 
 
 def _murmur3_x64_128(source: io.BufferedIOBase, seed: int) -> str:
@@ -397,20 +333,12 @@ def _murmur3_x64_128(source: io.BufferedIOBase, seed: int) -> str:
         if len(read) == 16:
             k1 = struct.unpack("<q", read[:8])[0]
             k2 = struct.unpack("<q", read[8:])[0]
-            h1 ^= (_rotate_left(k1 * C1 % MOD, R2) * C2 % MOD)
+            h1 ^= _rotate_left(k1 * C1 % MOD, R2) * C2 % MOD
             h1 = ((_rotate_left(h1, R1) + h2) * M + C3) % MOD
             h2 ^= _rotate_left(k2 * C2 % MOD, R3) * C1 % MOD
             h2 = ((_rotate_left(h2, R2) + h1) * M + C4) % MOD
         elif len(read) == 0:
-            h1 ^= processed
-            h2 ^= processed
-            h1 = (h1 + h2) % MOD
-            h2 = (h2 + h1) % MOD
-            h1 = _fmix64(h1)
-            h2 = _fmix64(h2)
-            h1 = (h1 + h2) % MOD
-            h2 = (h2 + h1) % MOD
-            return (h2 << 64) | h1
+            return _extracted_from__murmur3_x64_128_20(processed, h1, h2)
         else:
             k1 = 0
             k2 = 0
@@ -448,6 +376,18 @@ def _murmur3_x64_128(source: io.BufferedIOBase, seed: int) -> str:
                 k1 ^= int(read[0])
             k1 = _rotate_left(k1 * C1 % MOD, R2) * C2 % MOD
             h1 ^= k1
+
+
+def _extracted_from__murmur3_x64_128_20(processed, h1, h2):
+    h1 ^= processed
+    h2 ^= processed
+    h1 = (h1 + h2) % MOD
+    h2 = (h2 + h1) % MOD
+    h1 = _fmix64(h1)
+    h2 = _fmix64(h2)
+    h1 = (h1 + h2) % MOD
+    h2 = (h2 + h1) % MOD
+    return (h2 << 64) | h1
 
 
 def _fmix64(k: int) -> int:
